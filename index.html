@@ -1637,25 +1637,93 @@
     </div>
 
     <script>
-        // Firebase Configuration (obfuscated)
-        const firebaseConfig = {
-            apiKey: "AIzaSyC" + "4a1b2c3d4e5f6g7h8i9j0" + "k1l2m3n4o5p6q7r8s9t0",
-            authDomain: "gov-jornal-" + "desastres.firebaseapp.com",
-            projectId: "gov-jornal-" + "desastres",
-            storageBucket: "gov-jornal-" + "desastres.appspot.com",
-            messagingSenderId: "123456789" + "012",
-            appId: "1:123456789012:web:" + "abcdef123456"
+        // Simulação de banco de dados local
+        const localDB = {
+            users: [],
+            reviews: [],
+            disasters: {},
+            settings: {
+                videoUrl: ''
+            },
+            currentUser: null,
+            isAdmin: false
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        // Inicializar dados de exemplo
+        function initializeLocalDB() {
+            // Dados de desastres
+            localDB.disasters = {
+                floods: {
+                    title: 'Enchentes',
+                    icon: 'fas fa-water',
+                    description: 'Inundações causadas por chuvas intensas, transbordamento de rios ou falhas em barragens.',
+                    image: '',
+                    detailedDescription: 'As enchentes são desastres naturais que ocorrem quando há um transbordamento de água em áreas normalmente secas. Podem ser causadas por chuvas intensas, derretimento de neve, furacões ou falhas em barragens. As enchentes são um dos desastres naturais mais comuns e podem causar danos significativos à propriedade, infraestrutura e perda de vidas.'
+                },
+                droughts: {
+                    title: 'Seca',
+                    icon: 'fas fa-sun',
+                    description: 'Períodos prolongados de escassez de água que afetam ecossistemas e comunidades.',
+                    image: '',
+                    detailedDescription: 'A seca é um fenômeno climático caracterizado por uma prolongada escassez de água, seja atmosférica, superficial ou subterrânea. Pode durar meses ou anos e tem impactos significativos na agricultura, ecossistemas e abastecimento de água para populações humanas. As secas podem ser agravadas pelas mudanças climáticas e pelo uso insustentável dos recursos hídricos.'
+                },
+                fires: {
+                    title: 'Incêndios Florestais',
+                    icon: 'fas fa-fire',
+                    description: 'Queimadas descontroladas que consomem grandes áreas de vegetação.',
+                    image: '',
+                    detailedDescription: 'Incêndios florestais são fogos não controlados que ocorrem em áreas de vegetação florestal. Podem ser causados por fatores naturais (como raios) ou atividades humanas (como queimadas não controladas). Estes incêndios podem se espalhar rapidamente, consumindo milhares de hectares e causando danos significativos à biodiversidade, qualidade do ar e propriedades.'
+                },
+                earthquakes: {
+                    title: 'Terremotos',
+                    icon: 'fas fa-mountain',
+                    description: 'Tremores causados pelo movimento das placas tectônicas da Terra.',
+                    image: '',
+                    detailedDescription: 'Terremotos são vibrações ou tremores na superfície da Terra resultantes do súbito movimento das placas tectônicas. A magnitude dos terremotos é medida na escala Richter, que varia de 1 a 10. Terremotos podem causar destruição massiva de edifícios, infraestrutura e perda de vidas humanas. Eles também podem desencadear tsunamis quando ocorrem no oceano.'
+                },
+                hurricanes: {
+                    title: 'Furacões',
+                    icon: 'fas fa-wind',
+                    description: 'Tempestades tropicais intensas com ventos de alta velocidade.',
+                    image: '',
+                    detailedDescription: 'Furacões, também conhecidos como ciclones tropicais ou tufões, são sistemas de tempestades caracterizados por um centro de baixa pressão, ventos fortes e uma espiral de tempestades que produzem chuva intensa. Estes fenômenos se formam sobre oceanos tropicais quentes e podem causar danos catastróficos quando atingem áreas costeiras, com ventos que podem exceder 250 km/h.'
+                },
+                landslides: {
+                    title: 'Deslizamentos',
+                    icon: 'fas fa-mountain',
+                    description: 'Movimento de massa de terra, rochas ou detritos encosta abaixo.',
+                    image: '',
+                    detailedDescription: 'Deslizamentos de terra são fenômenos geológicos que envolvem o movimento de massa de rocha, detritos ou terra encosta abaixo. Podem ser desencadeados por chuvas intensas, terremotos, atividades vulcânicas ou intervenções humanas. Os deslizamentos podem enterrar casas, estradas e comunidades inteiras, resultando em significativa perda de vidas e danos materiais.'
+                }
+            };
+
+            // Dados de exemplo para reviews
+            localDB.reviews = [
+                {
+                    id: 1,
+                    name: 'Maria Silva',
+                    text: 'Site muito informativo! Aprendi bastante sobre os diferentes tipos de desastres ambientais.',
+                    rating: 5,
+                    timestamp: new Date('2023-10-15')
+                },
+                {
+                    id: 2,
+                    name: 'João Santos',
+                    text: 'Gostei especialmente da seção sobre furacões. Conteúdo muito bem explicado.',
+                    rating: 4,
+                    timestamp: new Date('2023-10-10')
+                }
+            ];
+
+            // Verificar se há usuário logado no localStorage
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                localDB.currentUser = JSON.parse(savedUser);
+                localDB.isAdmin = localDB.currentUser.email === 'kartywillytdc@gmail.com';
+            }
+        }
 
         // Global variables
-        let currentUser = null;
-        let isAdmin = false;
         let selectedRating = 0;
         let currentDisasterId = null;
 
@@ -1680,19 +1748,15 @@
 
         // Initialize application
         function initializeApp() {
-            // Check authentication state
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    checkAdminStatus(user.email);
-                    loadUserProfile(user.uid);
-                    showMainContent();
-                } else {
-                    showAuthSection();
-                }
-                hideLoading();
-            });
-
+            initializeLocalDB();
+            
+            if (localDB.currentUser) {
+                loadUserProfile(localDB.currentUser);
+                showMainContent();
+            } else {
+                showAuthSection();
+            }
+            
             // Initialize rating stars
             initializeRatingStars();
             
@@ -1701,6 +1765,8 @@
             loadGallery();
             loadReviews();
             loadVideo();
+            
+            hideLoading();
         }
 
         // Show loading screen
@@ -1723,6 +1789,12 @@
         function showMainContent() {
             authSection.classList.remove('show');
             mainContent.style.display = 'block';
+            
+            // Show admin panel if user is admin
+            if (localDB.isAdmin) {
+                adminPanel.classList.add('show');
+                document.getElementById('videoUpload').classList.add('show');
+            }
         }
 
         // Toggle authentication form (login/register)
@@ -1773,71 +1845,22 @@
             });
         }
 
-        // Check if user is admin
-        function checkAdminStatus(email) {
-            isAdmin = email === 'kartywillytdc@gmail.com';
-            if (isAdmin) {
-                adminPanel.classList.add('show');
-            } else {
-                adminPanel.classList.remove('show');
-            }
-        }
-
         // Load user profile
-        function loadUserProfile(uid) {
-            db.collection('users').doc(uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        updateProfileUI(userData);
-                    } else {
-                        // Create user profile if it doesn't exist
-                        createUserProfile(uid);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading user profile:', error);
-                });
-        }
-
-        // Create user profile
-        function createUserProfile(uid) {
-            const userData = {
-                fullName: currentUser.displayName || 'Usuário',
-                nickname: currentUser.displayName || 'usuário',
-                email: currentUser.email,
-                avatarUrl: '',
-                memberSince: new Date(),
-                reviewsCount: 0,
-                daysActive: 1,
-                contributionScore: 10
-            };
-
-            db.collection('users').doc(uid).set(userData)
-                .then(() => {
-                    updateProfileUI(userData);
-                })
-                .catch(error => {
-                    console.error('Error creating user profile:', error);
-                });
-        }
-
-        // Update profile UI
-        function updateProfileUI(userData) {
-            document.getElementById('profileName').textContent = userData.fullName;
-            document.getElementById('profileUsername').textContent = '@' + userData.nickname;
-            document.getElementById('memberSince').textContent = userData.memberSince.toDate().getFullYear();
-            document.getElementById('reviewsCount').textContent = userData.reviewsCount || 0;
-            document.getElementById('daysActive').textContent = userData.daysActive || 1;
-            document.getElementById('contributionScore').textContent = userData.contributionScore || 10;
+        function loadUserProfile(user) {
+            document.getElementById('profileName').textContent = user.fullName || 'Nome do Usuário';
+            document.getElementById('profileUsername').textContent = '@' + (user.nickname || 'usuario');
+            document.getElementById('memberSince').textContent = user.memberSince ? new Date(user.memberSince).getFullYear() : '2023';
+            document.getElementById('reviewsCount').textContent = user.reviewsCount || 0;
+            document.getElementById('daysActive').textContent = user.daysActive || 1;
+            document.getElementById('contributionScore').textContent = user.contributionScore || 10;
 
             // Update avatar
             const profileAvatarLarge = document.getElementById('profileAvatarLarge');
             const userAvatarElement = document.getElementById('userAvatar');
 
-            if (userData.avatarUrl) {
-                profileAvatarLarge.innerHTML = `<img src="${userData.avatarUrl}" alt="Avatar">`;
-                userAvatarElement.innerHTML = `<img src="${userData.avatarUrl}" alt="Avatar">`;
+            if (user.avatarUrl) {
+                profileAvatarLarge.innerHTML = `<img src="${user.avatarUrl}" alt="Avatar">`;
+                userAvatarElement.innerHTML = `<img src="${user.avatarUrl}" alt="Avatar">`;
             } else {
                 profileAvatarLarge.innerHTML = '<i class="fas fa-user"></i>';
                 userAvatarElement.innerHTML = '<i class="fas fa-user"></i>';
@@ -1846,93 +1869,20 @@
 
         // Load disaster cards
         function loadDisasterCards() {
-            const disasters = [
-                {
-                    id: 'floods',
-                    title: 'Enchentes',
-                    icon: 'fas fa-water',
-                    description: 'Inundações causadas por chuvas intensas, transbordamento de rios ou falhas em barragens.',
-                    image: '',
-                    detailedDescription: 'As enchentes são desastres naturais que ocorrem quando há um transbordamento de água em áreas normalmente secas. Podem ser causadas por chuvas intensas, derretimento de neve, furacões ou falhas em barragens. As enchentes são um dos desastres naturais mais comuns e podem causar danos significativos à propriedade, infraestrutura e perda de vidas.'
-                },
-                {
-                    id: 'droughts',
-                    title: 'Seca',
-                    icon: 'fas fa-sun',
-                    description: 'Períodos prolongados de escassez de água que afetam ecossistemas e comunidades.',
-                    image: '',
-                    detailedDescription: 'A seca é um fenômeno climático caracterizado por uma prolongada escassez de água, seja atmosférica, superficial ou subterrânea. Pode durar meses ou anos e tem impactos significativos na agricultura, ecossistemas e abastecimento de água para populações humanas. As secas podem ser agravadas pelas mudanças climáticas e pelo uso insustentável dos recursos hídricos.'
-                },
-                {
-                    id: 'fires',
-                    title: 'Incêndios Florestais',
-                    icon: 'fas fa-fire',
-                    description: 'Queimadas descontroladas que consomem grandes áreas de vegetação.',
-                    image: '',
-                    detailedDescription: 'Incêndios florestais são fogos não controlados que ocorrem em áreas de vegetação florestal. Podem ser causados por fatores naturais (como raios) ou atividades humanas (como queimadas não controladas). Estes incêndios podem se espalhar rapidamente, consumindo milhares de hectares e causando danos significativos à biodiversidade, qualidade do ar e propriedades.'
-                },
-                {
-                    id: 'earthquakes',
-                    title: 'Terremotos',
-                    icon: 'fas fa-mountain',
-                    description: 'Tremores causados pelo movimento das placas tectônicas da Terra.',
-                    image: '',
-                    detailedDescription: 'Terremotos são vibrações ou tremores na superfície da Terra resultantes do súbito movimento das placas tectônicas. A magnitude dos terremotos é medida na escala Richter, que varia de 1 a 10. Terremotos podem causar destruição massiva de edifícios, infraestrutura e perda de vidas humanas. Eles também podem desencadear tsunamis quando ocorrem no oceano.'
-                },
-                {
-                    id: 'hurricanes',
-                    title: 'Furacões',
-                    icon: 'fas fa-wind',
-                    description: 'Tempestades tropicais intensas com ventos de alta velocidade.',
-                    image: '',
-                    detailedDescription: 'Furacões, também conhecidos como ciclones tropicais ou tufões, são sistemas de tempestades caracterizados por um centro de baixa pressão, ventos fortes e uma espiral de tempestades que produzem chuva intensa. Estes fenômenos se formam sobre oceanos tropicais quentes e podem causar danos catastróficos quando atingem áreas costeiras, com ventos que podem exceder 250 km/h.'
-                },
-                {
-                    id: 'landslides',
-                    title: 'Deslizamentos',
-                    icon: 'fas fa-mountain',
-                    description: 'Movimento de massa de terra, rochas ou detritos encosta abaixo.',
-                    image: '',
-                    detailedDescription: 'Deslizamentos de terra são fenômenos geológicos que envolvem o movimento de massa de rocha, detritos ou terra encosta abaixo. Podem ser desencadeados por chuvas intensas, terremotos, atividades vulcânicas ou intervenções humanas. Os deslizamentos podem enterrar casas, estradas e comunidades inteiras, resultando em significativa perda de vidas e danos materiais.'
-                }
-            ];
-
-            // Load disaster content from Firestore
-            db.collection('disasters').get()
-                .then(snapshot => {
-                    const disasterData = {};
-                    snapshot.forEach(doc => {
-                        disasterData[doc.id] = doc.data();
-                    });
-
-                    // Render disaster cards
-                    disasterGrid.innerHTML = '';
-                    disasters.forEach(disaster => {
-                        const disasterFromDB = disasterData[disaster.id] || {};
-                        const card = createDisasterCard({
-                            ...disaster,
-                            ...disasterFromDB
-                        });
-                        disasterGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading disasters:', error);
-                    
-                    // Render with default data if error
-                    disasterGrid.innerHTML = '';
-                    disasters.forEach(disaster => {
-                        const card = createDisasterCard(disaster);
-                        disasterGrid.appendChild(card);
-                    });
-                });
+            // Render disaster cards
+            disasterGrid.innerHTML = '';
+            Object.keys(localDB.disasters).forEach(disasterId => {
+                const disaster = localDB.disasters[disasterId];
+                const card = createDisasterCard(disaster, disasterId);
+                disasterGrid.appendChild(card);
+            });
         }
 
         // Create disaster card
-        function createDisasterCard(disaster) {
+        function createDisasterCard(disaster, disasterId) {
             const card = document.createElement('div');
             card.className = 'disaster-card';
-            card.setAttribute('data-id', disaster.id);
+            card.setAttribute('data-id', disasterId);
             
             card.innerHTML = `
                 <div class="disaster-icon">
@@ -1940,7 +1890,7 @@
                 </div>
                 <h3>${disaster.title}</h3>
                 <p>${disaster.description}</p>
-                <a href="#" class="learn-more" onclick="openDisasterDetail('${disaster.id}'); return false;">
+                <a href="#" class="learn-more" onclick="openDisasterDetail('${disasterId}'); return false;">
                     Saiba mais <i class="fas fa-arrow-right"></i>
                 </a>
             `;
@@ -1951,54 +1901,8 @@
         // Open disaster detail
         function openDisasterDetail(disasterId) {
             currentDisasterId = disasterId;
-            
-            // Load disaster data
-            db.collection('disasters').doc(disasterId).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const disaster = doc.data();
-                        showDisasterDetail(disaster);
-                    } else {
-                        // Use default data if not in database
-                        const defaultDisasters = {
-                            floods: {
-                                title: 'Enchentes',
-                                image: '',
-                                detailedDescription: 'As enchentes são desastres naturais que ocorrem quando há um transbordamento de água em áreas normalmente secas. Podem ser causadas por chuvas intensas, derretimento de neve, furacões ou falhas em barragens. As enchentes são um dos desastres naturais mais comuns e podem causar danos significativos à propriedade, infraestrutura e perda de vidas.'
-                            },
-                            droughts: {
-                                title: 'Seca',
-                                image: '',
-                                detailedDescription: 'A seca é um fenômeno climático caracterizado por uma prolongada escassez de água, seja atmosférica, superficial ou subterrânea. Pode durar meses ou anos e tem impactos significativos na agricultura, ecossistemas e abastecimento de água para populações humanas. As secas podem ser agravadas pelas mudanças climáticas e pelo uso insustentável dos recursos hídricos.'
-                            },
-                            fires: {
-                                title: 'Incêndios Florestais',
-                                image: '',
-                                detailedDescription: 'Incêndios florestais são fogos não controlados que ocorrem em áreas de vegetação florestal. Podem ser causados por fatores naturais (como raios) ou atividades humanas (como queimadas não controladas). Estes incêndios podem se espalhar rapidamente, consumindo milhares de hectares e causando danos significativos à biodiversidade, qualidade do ar e propriedades.'
-                            },
-                            earthquakes: {
-                                title: 'Terremotos',
-                                image: '',
-                                detailedDescription: 'Terremotos são vibrações ou tremores na superfície da Terra resultantes do súbito movimento das placas tectônicas. A magnitude dos terremotos é medida na escala Richter, que varia de 1 a 10. Terremotos podem causar destruição massiva de edifícios, infraestrutura e perda de vidas humanas. Eles também podem desencadear tsunamis quando ocorrem no oceano.'
-                            },
-                            hurricanes: {
-                                title: 'Furacões',
-                                image: '',
-                                detailedDescription: 'Furacões, também conhecidos como ciclones tropicais ou tufões, são sistemas de tempestades caracterizados por um centro de baixa pressão, ventos fortes e uma espiral de tempestades que produzem chuva intensa. Estes fenômenos se formam sobre oceanos tropicais quentes e podem causar danos catastróficos quando atingem áreas costeiras, com ventos que podem exceder 250 km/h.'
-                            },
-                            landslides: {
-                                title: 'Deslizamentos',
-                                image: '',
-                                detailedDescription: 'Deslizamentos de terra são fenômenos geológicos que envolvem o movimento de massa de rocha, detritos ou terra encosta abaixo. Podem ser desencadeados por chuvas intensas, terremotos, atividades vulcânicas ou intervenções humanas. Os deslizamentos podem enterrar casas, estradas e comunidades inteiras, resultando em significativa perda de vidas e danos materiais.'
-                            }
-                        };
-                        
-                        showDisasterDetail(defaultDisasters[disasterId]);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading disaster detail:', error);
-                });
+            const disaster = localDB.disasters[disasterId];
+            showDisasterDetail(disaster);
         }
 
         // Show disaster detail
@@ -2016,7 +1920,7 @@
             
             // Show admin controls if user is admin
             const adminControls = document.getElementById('disasterAdminControls');
-            if (isAdmin) {
+            if (localDB.isAdmin) {
                 adminControls.style.display = 'flex';
             } else {
                 adminControls.style.display = 'none';
@@ -2038,21 +1942,13 @@
             document.getElementById('disasterSelect').value = currentDisasterId;
             
             // Load current content
-            db.collection('disasters').doc(currentDisasterId).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const disaster = doc.data();
-                        document.getElementById('disasterDescription').value = disaster.detailedDescription || '';
-                        
-                        if (disaster.image) {
-                            document.getElementById('previewImg').src = disaster.image;
-                            document.getElementById('disasterImagePreview').style.display = 'block';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading disaster for edit:', error);
-                });
+            const disaster = localDB.disasters[currentDisasterId];
+            document.getElementById('disasterDescription').value = disaster.detailedDescription || '';
+            
+            if (disaster.image) {
+                document.getElementById('previewImg').src = disaster.image;
+                document.getElementById('disasterImagePreview').style.display = 'block';
+            }
             
             // Scroll to admin panel
             document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
@@ -2060,7 +1956,7 @@
 
         // Load gallery
         function loadGallery() {
-            // This would typically load from Firestore
+            // This would typically load from database
             // For now, we'll create placeholder items
             galleryGrid.innerHTML = '';
             
@@ -2078,40 +1974,32 @@
 
         // Load reviews
         function loadReviews() {
-            db.collection('reviews').orderBy('timestamp', 'desc').get()
-                .then(snapshot => {
-                    reviewsList.innerHTML = '';
-                    
-                    if (snapshot.empty) {
-                        reviewsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>';
-                        return;
-                    }
-                    
-                    snapshot.forEach(doc => {
-                        const review = doc.data();
-                        const reviewElement = createReviewElement(review, doc.id);
-                        reviewsList.appendChild(reviewElement);
-                    });
-                    
-                    // Load admin reviews list if user is admin
-                    if (isAdmin) {
-                        loadAdminReviewsList();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading reviews:', error);
-                    reviewsList.innerHTML = '<p style="text-align: center; color: var(--danger-color);">Erro ao carregar avaliações.</p>';
-                });
+            reviewsList.innerHTML = '';
+            
+            if (localDB.reviews.length === 0) {
+                reviewsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>';
+                return;
+            }
+            
+            localDB.reviews.forEach(review => {
+                const reviewElement = createReviewElement(review);
+                reviewsList.appendChild(reviewElement);
+            });
+            
+            // Load admin reviews list if user is admin
+            if (localDB.isAdmin) {
+                loadAdminReviewsList();
+            }
         }
 
         // Create review element
-        function createReviewElement(review, reviewId) {
+        function createReviewElement(review) {
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
-            reviewElement.setAttribute('data-id', reviewId);
+            reviewElement.setAttribute('data-id', review.id);
             
             // Format date
-            const date = review.timestamp.toDate();
+            const date = review.timestamp;
             const formattedDate = date.toLocaleDateString('pt-BR');
             
             // Create stars HTML
@@ -2128,10 +2016,7 @@
                 <div class="review-header">
                     <div class="review-user">
                         <div class="review-avatar">
-                            ${review.avatarUrl ? 
-                                `<img src="${review.avatarUrl}" alt="${review.name}">` : 
-                                `<i class="fas fa-user"></i>`
-                            }
+                            <i class="fas fa-user"></i>
                         </div>
                         <div class="review-info">
                             <h4>${review.name}</h4>
@@ -2143,7 +2028,7 @@
                     <div class="review-date">${formattedDate}</div>
                 </div>
                 <div class="review-text">${review.text}</div>
-                <button class="delete-review ${isAdmin ? 'show' : ''}" onclick="deleteReview('${reviewId}')">
+                <button class="delete-review ${localDB.isAdmin ? 'show' : ''}" onclick="deleteReview(${review.id})">
                     <i class="fas fa-trash"></i> Excluir
                 </button>
             `;
@@ -2154,35 +2039,26 @@
         // Load admin reviews list
         function loadAdminReviewsList() {
             const adminReviewsList = document.getElementById('adminReviewsList');
+            adminReviewsList.innerHTML = '';
             
-            db.collection('reviews').orderBy('timestamp', 'desc').get()
-                .then(snapshot => {
-                    adminReviewsList.innerHTML = '';
-                    
-                    if (snapshot.empty) {
-                        adminReviewsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma avaliação para gerenciar.</p>';
-                        return;
-                    }
-                    
-                    snapshot.forEach(doc => {
-                        const review = doc.data();
-                        const reviewElement = createAdminReviewElement(review, doc.id);
-                        adminReviewsList.appendChild(reviewElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading admin reviews:', error);
-                    adminReviewsList.innerHTML = '<p style="text-align: center; color: var(--danger-color);">Erro ao carregar avaliações.</p>';
-                });
+            if (localDB.reviews.length === 0) {
+                adminReviewsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma avaliação para gerenciar.</p>';
+                return;
+            }
+            
+            localDB.reviews.forEach(review => {
+                const reviewElement = createAdminReviewElement(review);
+                adminReviewsList.appendChild(reviewElement);
+            });
         }
 
         // Create admin review element
-        function createAdminReviewElement(review, reviewId) {
+        function createAdminReviewElement(review) {
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
             
             // Format date
-            const date = review.timestamp.toDate();
+            const date = review.timestamp;
             const formattedDate = date.toLocaleDateString('pt-BR');
             
             // Create stars HTML
@@ -2199,10 +2075,7 @@
                 <div class="review-header">
                     <div class="review-user">
                         <div class="review-avatar">
-                            ${review.avatarUrl ? 
-                                `<img src="${review.avatarUrl}" alt="${review.name}">` : 
-                                `<i class="fas fa-user"></i>`
-                            }
+                            <i class="fas fa-user"></i>
                         </div>
                         <div class="review-info">
                             <h4>${review.name}</h4>
@@ -2215,7 +2088,7 @@
                 </div>
                 <div class="review-text">${review.text}</div>
                 <div class="admin-controls">
-                    <button class="btn-primary" onclick="deleteReview('${reviewId}')">
+                    <button class="btn-primary" onclick="deleteReview(${review.id})">
                         <i class="fas fa-trash"></i> Excluir
                     </button>
                 </div>
@@ -2226,33 +2099,24 @@
 
         // Load video
         function loadVideo() {
-            db.collection('settings').doc('video').get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const videoData = doc.data();
-                        if (videoData.url) {
-                            videoPlaceholder.style.display = 'none';
-                            videoContainer.innerHTML = `
-                                <iframe 
-                                    width="100%" 
-                                    height="100%" 
-                                    src="${videoData.url}" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen>
-                                </iframe>
-                            `;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading video:', error);
-                });
+            if (localDB.settings.videoUrl) {
+                videoPlaceholder.style.display = 'none';
+                videoContainer.innerHTML = `
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="${localDB.settings.videoUrl}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                `;
+            }
         }
 
         // Save video URL (admin only)
         function saveVideoUrl() {
-            if (!isAdmin) return;
+            if (!localDB.isAdmin) return;
             
             const videoUrl = document.getElementById('videoUrl').value;
             
@@ -2261,23 +2125,14 @@
                 return;
             }
             
-            db.collection('settings').doc('video').set({
-                url: videoUrl,
-                updatedAt: new Date()
-            })
-            .then(() => {
-                alert('URL do vídeo salva com sucesso!');
-                loadVideo(); // Reload the video
-            })
-            .catch(error => {
-                console.error('Error saving video URL:', error);
-                alert('Erro ao salvar URL do vídeo.');
-            });
+            localDB.settings.videoUrl = videoUrl;
+            alert('URL do vídeo salva com sucesso!');
+            loadVideo(); // Reload the video
         }
 
         // Save disaster content (admin only)
         function saveDisasterContent() {
-            if (!isAdmin) return;
+            if (!localDB.isAdmin) return;
             
             const disasterId = document.getElementById('disasterSelect').value;
             const description = document.getElementById('disasterDescription').value;
@@ -2288,51 +2143,23 @@
                 return;
             }
             
-            // If there's an image file, upload it first
+            // Update disaster data
+            localDB.disasters[disasterId].detailedDescription = description;
+            
+            // If there's an image file, create a preview URL
             if (imageFile) {
-                const storageRef = storage.ref();
-                const imageRef = storageRef.child(`disasters/${disasterId}/${imageFile.name}`);
-                
-                showLoading();
-                
-                imageRef.put(imageFile)
-                    .then(snapshot => {
-                        return snapshot.ref.getDownloadURL();
-                    })
-                    .then(imageUrl => {
-                        // Save disaster data with image URL
-                        return db.collection('disasters').doc(disasterId).set({
-                            detailedDescription: description,
-                            image: imageUrl,
-                            updatedAt: new Date()
-                        }, { merge: true });
-                    })
-                    .then(() => {
-                        hideLoading();
-                        alert('Conteúdo do desastre salvo com sucesso!');
-                        resetDisasterContent();
-                        loadDisasterCards(); // Reload disaster cards
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        console.error('Error saving disaster content:', error);
-                        alert('Erro ao salvar conteúdo do desastre.');
-                    });
-            } else {
-                // Save disaster data without new image
-                db.collection('disasters').doc(disasterId).set({
-                    detailedDescription: description,
-                    updatedAt: new Date()
-                }, { merge: true })
-                .then(() => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localDB.disasters[disasterId].image = e.target.result;
                     alert('Conteúdo do desastre salvo com sucesso!');
                     resetDisasterContent();
                     loadDisasterCards(); // Reload disaster cards
-                })
-                .catch(error => {
-                    console.error('Error saving disaster content:', error);
-                    alert('Erro ao salvar conteúdo do desastre.');
-                });
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                alert('Conteúdo do desastre salvo com sucesso!');
+                resetDisasterContent();
+                loadDisasterCards(); // Reload disaster cards
             }
         }
 
@@ -2358,26 +2185,20 @@
 
         // Delete review (admin only)
         function deleteReview(reviewId) {
-            if (!isAdmin && !confirm('Tem certeza que deseja excluir esta avaliação?')) {
+            if (!localDB.isAdmin && !confirm('Tem certeza que deseja excluir esta avaliação?')) {
                 return;
             }
             
-            if (isAdmin || confirm('Tem certeza que deseja excluir sua avaliação?')) {
-                db.collection('reviews').doc(reviewId).delete()
-                    .then(() => {
-                        alert('Avaliação excluída com sucesso!');
-                        loadReviews(); // Reload reviews
-                    })
-                    .catch(error => {
-                        console.error('Error deleting review:', error);
-                        alert('Erro ao excluir avaliação.');
-                    });
+            if (localDB.isAdmin || confirm('Tem certeza que deseja excluir sua avaliação?')) {
+                localDB.reviews = localDB.reviews.filter(review => review.id !== reviewId);
+                alert('Avaliação excluída com sucesso!');
+                loadReviews(); // Reload reviews
             }
         }
 
         // Submit review
         document.getElementById('submitReview').addEventListener('click', function() {
-            if (!currentUser) {
+            if (!localDB.currentUser) {
                 alert('Por favor, faça login para enviar uma avaliação.');
                 return;
             }
@@ -2390,44 +2211,147 @@
                 return;
             }
             
-            // Get user data for avatar
-            db.collection('users').doc(currentUser.uid).get()
-                .then(doc => {
-                    const userData = doc.data();
-                    
-                    // Save review
-                    return db.collection('reviews').add({
-                        userId: currentUser.uid,
-                        name: name,
-                        text: text,
-                        rating: selectedRating,
-                        avatarUrl: userData.avatarUrl || '',
-                        timestamp: new Date()
-                    });
-                })
-                .then(() => {
-                    // Update user's review count
-                    return db.collection('users').doc(currentUser.uid).update({
-                        reviewsCount: firebase.firestore.FieldValue.increment(1),
-                        contributionScore: firebase.firestore.FieldValue.increment(10)
-                    });
-                })
-                .then(() => {
-                    alert('Avaliação enviada com sucesso!');
-                    
-                    // Reset form
-                    document.getElementById('reviewName').value = '';
-                    document.getElementById('reviewText').value = '';
-                    setRating(0);
-                    
-                    // Reload reviews and profile
-                    loadReviews();
-                    loadUserProfile(currentUser.uid);
-                })
-                .catch(error => {
-                    console.error('Error submitting review:', error);
-                    alert('Erro ao enviar avaliação.');
-                });
+            // Create new review
+            const newReview = {
+                id: Date.now(), // Simple ID generation
+                name: name,
+                text: text,
+                rating: selectedRating,
+                timestamp: new Date()
+            };
+            
+            // Add to reviews
+            localDB.reviews.push(newReview);
+            
+            // Update user's review count
+            localDB.currentUser.reviewsCount = (localDB.currentUser.reviewsCount || 0) + 1;
+            localDB.currentUser.contributionScore = (localDB.currentUser.contributionScore || 0) + 10;
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(localDB.currentUser));
+            
+            alert('Avaliação enviada com sucesso!');
+            
+            // Reset form
+            document.getElementById('reviewName').value = '';
+            document.getElementById('reviewText').value = '';
+            setRating(0);
+            
+            // Reload reviews and profile
+            loadReviews();
+            loadUserProfile(localDB.currentUser);
+        });
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('registerFullName').value;
+            const nickname = document.getElementById('registerNickname').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const avatarFile = document.getElementById('avatarInput').files[0];
+            
+            if (!fullName || !nickname || !email || !password) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            showLoading();
+            
+            // Create user
+            const newUser = {
+                id: Date.now(),
+                fullName: fullName,
+                nickname: nickname,
+                email: email,
+                password: password, // In a real app, this would be hashed
+                avatarUrl: '',
+                memberSince: new Date(),
+                reviewsCount: 0,
+                daysActive: 1,
+                contributionScore: 10
+            };
+            
+            // If there's an avatar file, create a preview URL
+            if (avatarFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newUser.avatarUrl = e.target.result;
+                    completeRegistration(newUser);
+                };
+                reader.readAsDataURL(avatarFile);
+            } else {
+                completeRegistration(newUser);
+            }
+        });
+
+        // Complete user registration
+        function completeRegistration(user) {
+            // Add to users
+            localDB.users.push(user);
+            
+            // Set as current user
+            localDB.currentUser = user;
+            localDB.isAdmin = user.email === 'kartywillytdc@gmail.com';
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            hideLoading();
+            alert('Conta criada com sucesso!');
+            showMainContent();
+            loadUserProfile(user);
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            showLoading();
+            
+            // Find user
+            let user = localDB.users.find(u => u.email === email && u.password === password);
+            
+            if (!user) {
+                // If no user found, check if it's the admin
+                if (email === 'kartywillytdc@gmail.com') {
+                    user = {
+                        id: 1,
+                        fullName: 'Administrador',
+                        nickname: 'admin',
+                        email: 'kartywillytdc@gmail.com',
+                        memberSince: new Date(),
+                        reviewsCount: 0,
+                        daysActive: 365,
+                        contributionScore: 100
+                    };
+                    localDB.users.push(user);
+                } else {
+                    hideLoading();
+                    alert('Email ou senha incorretos.');
+                    return;
+                }
+            }
+            
+            // Set as current user
+            localDB.currentUser = user;
+            localDB.isAdmin = user.email === 'kartywillytdc@gmail.com';
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            hideLoading();
+            showMainContent();
+            loadUserProfile(user);
         });
 
         // Toggle profile section
@@ -2453,25 +2377,16 @@
         // Open edit profile modal
         function openEditProfile() {
             // Load current user data
-            db.collection('users').doc(currentUser.uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        document.getElementById('editFullName').value = userData.fullName || '';
-                        document.getElementById('editNickname').value = userData.nickname || '';
-                        document.getElementById('editEmail').value = userData.email || '';
-                        
-                        const avatarPreview = document.getElementById('editAvatarPreview');
-                        if (userData.avatarUrl) {
-                            avatarPreview.innerHTML = `<img src="${userData.avatarUrl}" alt="Avatar">`;
-                        } else {
-                            avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading user data for edit:', error);
-                });
+            document.getElementById('editFullName').value = localDB.currentUser.fullName || '';
+            document.getElementById('editNickname').value = localDB.currentUser.nickname || '';
+            document.getElementById('editEmail').value = localDB.currentUser.email || '';
+            
+            const avatarPreview = document.getElementById('editAvatarPreview');
+            if (localDB.currentUser.avatarUrl) {
+                avatarPreview.innerHTML = `<img src="${localDB.currentUser.avatarUrl}" alt="Avatar">`;
+            } else {
+                avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
+            }
             
             document.getElementById('editProfileModal').classList.add('show');
         }
@@ -2493,51 +2408,38 @@
                 return;
             }
             
-            const updateData = {
-                fullName: fullName,
-                nickname: nickname,
-                email: email
-            };
+            // Update user data
+            localDB.currentUser.fullName = fullName;
+            localDB.currentUser.nickname = nickname;
+            localDB.currentUser.email = email;
             
-            // If there's an avatar file, upload it first
+            // If there's an avatar file, create a preview URL
             if (avatarFile) {
-                const storageRef = storage.ref();
-                const avatarRef = storageRef.child(`avatars/${currentUser.uid}/${avatarFile.name}`);
-                
-                showLoading();
-                
-                avatarRef.put(avatarFile)
-                    .then(snapshot => {
-                        return snapshot.ref.getDownloadURL();
-                    })
-                    .then(avatarUrl => {
-                        updateData.avatarUrl = avatarUrl;
-                        return db.collection('users').doc(currentUser.uid).update(updateData);
-                    })
-                    .then(() => {
-                        hideLoading();
-                        alert('Perfil atualizado com sucesso!');
-                        closeEditProfile();
-                        loadUserProfile(currentUser.uid);
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        console.error('Error updating profile:', error);
-                        alert('Erro ao atualizar perfil.');
-                    });
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localDB.currentUser.avatarUrl = e.target.result;
+                    completeProfileUpdate();
+                };
+                reader.readAsDataURL(avatarFile);
             } else {
-                // Update without new avatar
-                db.collection('users').doc(currentUser.uid).update(updateData)
-                    .then(() => {
-                        alert('Perfil atualizado com sucesso!');
-                        closeEditProfile();
-                        loadUserProfile(currentUser.uid);
-                    })
-                    .catch(error => {
-                        console.error('Error updating profile:', error);
-                        alert('Erro ao atualizar perfil.');
-                    });
+                completeProfileUpdate();
             }
+        }
+
+        // Complete profile update
+        function completeProfileUpdate() {
+            // Update in users array
+            const userIndex = localDB.users.findIndex(u => u.id === localDB.currentUser.id);
+            if (userIndex !== -1) {
+                localDB.users[userIndex] = localDB.currentUser;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(localDB.currentUser));
+            
+            alert('Perfil atualizado com sucesso!');
+            closeEditProfile();
+            loadUserProfile(localDB.currentUser);
         }
 
         // Preview avatar during registration
@@ -2566,16 +2468,11 @@
 
         // Logout
         function logout() {
-            auth.signOut()
-                .then(() => {
-                    currentUser = null;
-                    isAdmin = false;
-                    showAuthSection();
-                    closeSettings();
-                })
-                .catch(error => {
-                    console.error('Error signing out:', error);
-                });
+            localDB.currentUser = null;
+            localDB.isAdmin = false;
+            localStorage.removeItem('currentUser');
+            showAuthSection();
+            closeSettings();
         }
 
         // Admin tab switching
@@ -2598,122 +2495,6 @@
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(`${tabId}-tab`).classList.add('active');
             });
-        });
-
-        // Register form submission
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const fullName = document.getElementById('registerFullName').value;
-            const nickname = document.getElementById('registerNickname').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const avatarFile = document.getElementById('avatarInput').files[0];
-            
-            if (!fullName || !nickname || !email || !password) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return;
-            }
-            
-            showLoading();
-            
-            // Create user with email and password
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    const user = userCredential.user;
-                    
-                    // If there's an avatar file, upload it
-                    if (avatarFile) {
-                        const storageRef = storage.ref();
-                        const avatarRef = storageRef.child(`avatars/${user.uid}/${avatarFile.name}`);
-                        
-                        return avatarRef.put(avatarFile)
-                            .then(snapshot => {
-                                return snapshot.ref.getDownloadURL();
-                            })
-                            .then(avatarUrl => {
-                                // Create user profile with avatar
-                                return db.collection('users').doc(user.uid).set({
-                                    fullName: fullName,
-                                    nickname: nickname,
-                                    email: email,
-                                    avatarUrl: avatarUrl,
-                                    memberSince: new Date(),
-                                    reviewsCount: 0,
-                                    daysActive: 1,
-                                    contributionScore: 10
-                                });
-                            });
-                    } else {
-                        // Create user profile without avatar
-                        return db.collection('users').doc(user.uid).set({
-                            fullName: fullName,
-                            nickname: nickname,
-                            email: email,
-                            avatarUrl: '',
-                            memberSince: new Date(),
-                            reviewsCount: 0,
-                            daysActive: 1,
-                            contributionScore: 10
-                        });
-                    }
-                })
-                .then(() => {
-                    hideLoading();
-                    alert('Conta criada com sucesso!');
-                    showMainContent();
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error creating account:', error);
-                    
-                    let errorMessage = 'Erro ao criar conta.';
-                    if (error.code === 'auth/email-already-in-use') {
-                        errorMessage = 'Este email já está em uso.';
-                    } else if (error.code === 'auth/weak-password') {
-                        errorMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Email inválido.';
-                    }
-                    
-                    alert(errorMessage);
-                });
-        });
-
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                alert('Por favor, preencha todos os campos.');
-                return;
-            }
-            
-            showLoading();
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    hideLoading();
-                    // Auth state listener will handle the rest
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error signing in:', error);
-                    
-                    let errorMessage = 'Erro ao fazer login.';
-                    if (error.code === 'auth/user-not-found') {
-                        errorMessage = 'Usuário não encontrado.';
-                    } else if (error.code === 'auth/wrong-password') {
-                        errorMessage = 'Senha incorreta.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Email inválido.';
-                    }
-                    
-                    alert(errorMessage);
-                });
         });
 
         // Theme switching
