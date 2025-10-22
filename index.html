@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gov Jornal - Desastres Ambientais</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>Gov Jornal</span>
+            </a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home">Início</a></li>
+                    <li><a href="#disasters">Desastres</a></li>
+                    <li><a href="#gallery">Galeria</a></li>
+                    <li><a href="#reviews">Avaliações</a></li>
+                    <li><a href="#about">Sobre</a></li>
+                </ul>
+            </nav>
+            <div class="user-section">
+                <button class="btn-secondary" onclick="openSettings()">
+                    <i class="fas fa-cog"></i> Configurações
+                </button>
+                <div class="user-avatar" id="userAvatar" onclick="toggleProfile()">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auth Section -->
+    <section class="auth-section" id="authSection">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2 id="authTitle">Entrar</h2>
+                <p id="authSubtitle">Faça login para continuar</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Entrar</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Clique para adicionar foto</p>
+                </div>
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="registerFullName" placeholder="Nome Completo" required>
+                </div>
+                <div class="form-group">
+                    <label>Apelido</label>
+                    <input type="text" id="registerNickname" placeholder="Apelido" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Criar Conta</button>
+            </form>
+
+            <div class="auth-toggle">
+                <p id="authToggleText">
+                    Não tem uma conta? 
+                    <a href="#" onclick="toggleAuthForm(); return false;">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main id="mainContent" style="display: none;">
+        <!-- Hero -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1>Desastres Ambientais</h1>
+                <p>Informação de qualidade sobre os principais eventos que impactam nosso planeta</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                    <a href="#disasters" class="btn-primary">Explorar Desastres</a>
+                    <a href="#reviews" class="btn-secondary">Avaliar Site</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3D Planet Section -->
+        <section class="container">
+            <div class="planet-section">
+                <h2 class="section-title">Nosso Planeta Terra</h2>
+                <p class="section-subtitle">Visualização interativa 3D do nosso planeta</p>
+                <div class="planet-container">
+                    <iframe title="Планета Земля. Planeet Aarde. 行星地球." frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/1dbdb56dd730412cb7e23f772b3794e5/embed?autostart=1&preload=1&transparent=1"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Section -->
+        <section class="container">
+            <div class="video-section">
+                <h2 class="section-title">Jornal de Desastres</h2>
+                <p class="section-subtitle">Últimas notícias e atualizações sobre desastres ambientais</p>
+                <div class="video-container" id="videoContainer">
+                    <div class="video-placeholder">
+                        <i class="fas fa-play-circle"></i>
+                        <p>Nenhum vídeo disponível no momento</p>
+                    </div>
+                </div>
+                <div class="admin-upload" id="videoUpload">
+                    <h3 style="margin-bottom: 1rem;">Upload de Vídeo (Administrador)</h3>
+                    <div class="upload-area">
+                        <input type="text" id="videoUrl" placeholder="Cole a URL do vídeo do YouTube" style="width: 100%; padding: 1rem; margin-bottom: 1rem; background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary);">
+                        <button class="btn-primary" onclick="uploadVideo()">
+                            <i class="fas fa-upload"></i> Atualizar Vídeo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disasters Section -->
+        <section class="container" id="disasters">
+            <h2 class="section-title">Tipos de Desastres Ambientais</h2>
+            <p class="section-subtitle">Conheça os principais desastres que afetam o meio ambiente</p>
+            
+            <div class="disaster-grid">
+                <div class="disaster-card">
+                    <div class="disaster-icon">🌀</div>
+                    <h3>Ciclones</h3>
+                    <p>Ciclones tropicais são sistemas de baixa pressão que se formam sobre águas quentes dos oceanos. Eles trazem ventos extremamente fortes, chuvas intensas e podem causar destruição massiva em áreas costeiras.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">💧</div>
+                    <h3>Enchentes</h3>
+                    <p>Enchentes ocorrem quando há excesso de água que transborda dos cursos d'água naturais. São causadas por chuvas intensas, derretimento rápido de neve ou rompimento de barragens.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">🌊</div>
+                    <h3>Inundações</h3>
+                    <p>Inundações são o acúmulo anormal de água em áreas habitualmente secas. Diferente das enchentes, as inundações têm duração mais prolongada e podem afetar grandes extensões territoriais.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">🔥</div>
+                    <h3>Queimadas</h3>
+                    <p>Queimadas são incêndios em vegetação que podem ser naturais ou causados pelo homem. Destroem ecossistemas, liberam grandes quantidades de CO2 na atmosfera e afetam a qualidade do ar.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">🌳</div>
+                    <h3>Desmatamento</h3>
+                    <p>O desmatamento é a remoção em larga escala de florestas, geralmente para dar lugar à agricultura, pecuária ou urbanização. Este processo contribui significativamente para as mudanças climáticas.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">⛰️</div>
+                    <h3>Deslizamentos</h3>
+                    <p>Deslizamentos de terra ocorrem quando há movimento de massa de solo e rochas em encostas. São causados por chuvas intensas, desmatamento, construções inadequadas e atividade sísmica.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">🌡️</div>
+                    <h3>Ondas de Calor</h3>
+                    <p>Ondas de calor são períodos prolongados de temperaturas anormalmente altas. Causam desidratação, insolação e podem ser fatais para grupos vulneráveis.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">❄️</div>
+                    <h3>Secas</h3>
+                    <p>Secas são períodos prolongados de escassez de chuva que resultam em falta de água. Afetam agricultura, pecuária, abastecimento de água e podem levar à desertificação.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="disaster-card">
+                    <div class="disaster-icon">🏭</div>
+                    <h3>Poluição</h3>
+                    <p>A poluição ambiental contamina ar, água e solo com substâncias nocivas. Inclui poluição industrial, resíduos plásticos, agrotóxicos e gases de efeito estufa.</p>
+                    <a href="#" class="learn-more">
+                        Saiba mais <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="container gallery-section" id="gallery">
+            <h2 class="section-title">Galeria de Imagens</h2>
+            <p class="section-subtitle">Registros fotográficos de desastres ambientais</p>
+            
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-upload" id="galleryUpload">
+                <h3 style="margin-bottom: 1rem;">Upload de Imagens (Administrador)</h3>
+                <div class="upload-area">
+                    <input type="file" id="galleryInput" class="upload-input" accept="image/*" multiple onchange="uploadGalleryImages(event)">
+                    <label for="galleryInput" class="upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i> Adicionar Imagens
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="container" id="reviews">
+            <div class="reviews-section">
+                <h2 class="section-title">Avaliações dos Usuários</h2>
+                <p class="section-subtitle">Compartilhe sua opinião sobre o site</p>
+
+                <div class="review-form">
+                    <h3 style="margin-bottom: 1.5rem;">Deixe sua avaliação</h3>
+                    <form id="reviewForm">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="reviewEmail" placeholder="Seu email" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Avaliação</label>
+                            <div class="rating-input" id="ratingInput">
+                                <i class="fas fa-star" data-rating="1"></i>
+                                <i class="fas fa-star" data-rating="2"></i>
+                                <i class="fas fa-star" data-rating="3"></i>
+                                <i class="fas fa-star" data-rating="4"></i>
+                                <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Comentário</label>
+                            <textarea id="reviewComment" placeholder="Escreva sua opinião sobre o site..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Enviar Avaliação
+                        </button>
+                    </form>
+                </div>
+
+                <h3 style="margin: 3rem 0 1.5rem; font-size: 1.5rem;">Avaliações Recentes</h3>
+                <div class="reviews-list" id="reviewsList">
+                    <!-- Reviews will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section class="container profile-section" id="profileSection">
+            <div class="profile-card">
+                <div class="profile-avatar-large" id="profileAvatarLarge" onclick="document.getElementById('profileAvatarInput').click()">
+                    <i class="fas fa-user"></i>
+                </div>
+                <input type="file" id="profileAvatarInput" accept="image/*" style="display: none;" onchange="updateProfileAvatar(event)">
+                <h2 class="profile-name" id="profileName">Nome do Usuário</h2>
+                <p class="profile-username" id="profileUsername">@username</p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statReviews">0</div>
+                        <div class="stat-label">Avaliações</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statRating">0.0</div>
+                        <div class="stat-label">Avaliação Média</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statJoinDate">2025</div>
+                        <div class="stat-label">Membro desde</div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="logout()" style="margin-top: 2rem;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" style="display: none;">
+        <div class="footer-content">
+            <img src="https://via.placeholder.com/200x100/1c1c1e/007aff?text=Logo+Paraná" alt="Logo Paraná" class="logo-parana" id="logoParana">
+            
+            <div class="creator-info" id="about">
+                <h3><i class="fas fa-user-circle"></i> Sobre o Criador</h3>
+                <div class="creator-details">
+                    <div class="creator-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <strong>Criador:</strong><br>
+                            Karty Willy<br>
+                            <span style="color: var(--text-secondary);">Estudante</span>
+                        </div>
+                    </div>
+                    <div class="creator-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <strong>Email:</strong><br>
+                            kartywillytdc@gmail.com
+                        </div>
+                    </div>
+                    <div class="creator-item">
+                        <i class="fas fa-school"></i>
+                        <div>
+                            <strong>Instituição:</strong><br>
+                            Colégio Estadual São Francisco de Assis<br>
+                            <span style="color: var(--text-secondary);">SEED CESFA</span>
+                        </div>
+                    </div>
+                    <div class="creator-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <strong>Projeto:</strong><br>
+                            Desenvolvido para fins educacionais<br>
+                            <span style="color: var(--text-secondary);">Jornal Informativo sobre Desastres Ambientais</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Sobre o Projeto</h3>
+                    <p>Site informativo educacional desenvolvido para conscientização sobre desastres ambientais e seus impactos no planeta.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Links Rápidos</h3>
+                    <a href="#home">Início</a>
+                    <a href="#disasters">Desastres</a>
+                    <a href="#gallery">Galeria</a>
+                    <a href="#reviews">Avaliações</a>
+                    <a href="#about">Sobre</a>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contato da Escola</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-school"></i>
+                        <span>SEED CESFA</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span id="directorEmail">[Email da Diretora]</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span id="schoolPhone">[Telefone da Escola]</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Paraná, Brasil</span>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Recursos</h3>
+                    <a href="#">Documentação</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Política de Privacidade</a>
+                    <a href="#">Termos de Uso</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Gov Jornal - Desastres Ambientais. Todos os direitos reservados.</p>
+                <p style="margin-top: 0.5rem;">Desenvolvido por <strong>Karty Willy</strong> para o Colégio Estadual São Francisco de Assis</p>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                    <i class="fas fa-heart" style="color: #ff3b30;"></i> Feito com dedicação para educação ambiental
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Configurações</h2>
+                <button class="close-modal" onclick="closeSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-palette"></i> Tema de Cores</h3>
+                <div class="color-picker-grid">
+                    <div class="color-option active" style="background: #007aff;" onclick="changeTheme('#007aff')" data-color="#007aff"></div>
+                    <div class="color-option" style="background: #34c759;" onclick="changeTheme('#34c759')" data-color="#34c759"></div>
+                    <div class="color-option" style="background: #ff9500;" onclick="changeTheme('#ff9500')" data-color="#ff9500"></div>
+                    <div class="color-option" style="background: #ff3b30;" onclick="changeTheme('#ff3b30')" data-color="#ff3b30"></div>
+                    <div class="color-option" style="background: #af52de;" onclick="changeTheme('#af52de')" data-color="#af52de"></div>
+                    <div class="color-option" style="background: #ff2d55;" onclick="changeTheme('#ff2d55')" data-color="#ff2d55"></div>
+                    <div class="color-option" style="background: #5ac8fa;" onclick="changeTheme('#5ac8fa')" data-color="#5ac8fa"></div>
+                    <div class="color-option rainbow" onclick="changeTheme('rainbow')" data-color="rainbow"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-font"></i> Fonte</h3>
+                <div class="font-option active" onclick="changeFont('system')" data-font="system">
+                    <strong style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;">Sistema (Padrão)</strong>
+                </div>
+                <div class="font-option" onclick="changeFont('arial')" data-font="arial">
+                    <strong style="font-family: Arial, sans-serif;">Arial</strong>
+                </div>
+                <div class="font-option" onclick="changeFont('georgia')" data-font="georgia">
+                    <strong style="font-family: Georgia, serif;">Georgia</strong>
+                </div>
+                <div class="font-option" onclick="changeFont('courier')" data-font="courier">
+                    <strong style="font-family: 'Courier New', monospace;">Courier New</strong>
+                </div>
+                <div class="font-option" onclick="changeFont('verdana')" data-font="verdana">
+                    <strong style="font-family: Verdana, sans-serif;">Verdana</strong>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="resetSettings()" style="width: 100%; margin-top: 2rem;">
+                <i class="fas fa-undo"></i> Restaurar Padrão
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
